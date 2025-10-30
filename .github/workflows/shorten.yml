@@ -8,25 +8,32 @@ on:
         required: true
         type: string
 
+# allow the workflow to write repo contents (needed for git push)
+permissions:
+  contents: write
+
 jobs:
   shorten:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository (with credentials)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Configure Git
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Create Commit
+      - name: Create commit
         run: |
-          echo "Shortening URL: ${{ github.event.inputs.long_url }}"
           echo "${{ github.event.inputs.long_url }}" > last_url.txt
           git add last_url.txt
-          git commit -m "${{ github.event.inputs.long_url }}"
-          git push
+          git commit -m "${{ github.event.inputs.long_url }}" || echo "No changes to commit"
+          # push to the branch that triggered the workflow (works for workflow_dispatch)
+          git push origin HEAD:${{ github.ref_name }}
 
       - name: Output Commit Hash
         id: get_hash
