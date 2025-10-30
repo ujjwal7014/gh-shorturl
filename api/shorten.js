@@ -1,41 +1,68 @@
-/* eslint-disable no-undef */
-// api/shorten.js
-export default async function handler(req, res) {
+export default async function handler(request, response) {
+    console.log("Incoming request:", request.method);
+  
+    if (request.method !== "POST") {
+      console.warn("Invalid method:", request.method);
+      return response.status(405).json({ error: "Method not allowed" });
+    }
+  
     try {
-      const body = await req.json(); // Parse body
-      const longUrl = body.longUrl;
+      const { longUrl } = request.body || {};
   
       if (!longUrl) {
-        return res.status(400).json({ error: "Missing longUrl" });
+        return response.status(400).json({ error: 'Missing "longUrl"' });
       }
   
-      const response = await fetch(
-        "https://api.github.com/repos/ujjwal7014/gh-shorturl/actions/workflows/shorten.yml/dispatches",
+      const token = process.env.GITHUB_TOKEN;
+      if (!token) {
+        return response.status(500).json({ error: "GitHub token not configured" });
+      }
+  
+      const repoOwner = "ujjwal-kr"; // change this to your GitHub username/org
+      const repoName = "gh-shorturl"; // change this to your repo name
+      const workflowFileName = "shorten.yml"; // your GitHub Actions workflow filename
+  
+      console.log("Triggering GitHub workflow...");
+      const ghResponse = await fetch(
+        `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowFileName}/dispatches`,
         {
           method: "POST",
           headers: {
             Accept: "application/vnd.github+json",
-            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            ref: "main", // or master, depending on your branch
-            inputs: { long_url: longUrl },
+            ref: "main", // or your branch name
+            inputs: { longUrl },
           }),
         }
       );
   
-      if (!response.ok) {
-        const errorText = await response.text();
-        return res.status(response.status).json({
-          error: "GitHub API failed",
-          details: errorText,
+      const ghResultText = await ghResponse.text();
+  
+      if (!ghResponse.ok) {
+        console.error(
+          "GitHub workflow trigger failed",
+          ghResponse.status,
+          ghResultText
+        );
+        return response.status(ghResponse.status).json({
+          error: "Failed to trigger workflow",
+          details: ghResultText,
         });
       }
   
-      return res.status(200).json({ success: true });
+      console.log("GitHub workflow triggered successfully");
+      return response.status(200).json({
+        message: "GitHub workflow triggered successfully",
+        data: JSON.parse(ghResultText || "{}"),
+      });
     } catch (err) {
-      console.error("Serverless error:", err);
-      return res.status(500).json({ error: "Internal server error" });
+      console.error("Server error:", err);
+      return response
+        .status(500)
+        .json({ error: "Internal server error", details: err.message });
     }
   }
   
