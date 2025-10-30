@@ -18,7 +18,7 @@ export default async function handler(request, response) {
         return response.status(500).json({ error: "GitHub token not configured" });
       }
   
-      const repoOwner = "ujjwal-kr"; // change this to your GitHub username/org
+      const repoOwner = "ujjwal7014"; // change this to your GitHub username/org
       const repoName = "gh-shorturl"; // change this to your repo name
       
       // First, try to get the workflow ID by listing workflows
