@@ -1,0 +1,37 @@
+name: Shorten URL
+
+on:
+  workflow_dispatch:
+    inputs:
+      long_url:
+        description: 'The long URL to shorten'
+        required: true
+        type: string
+
+jobs:
+  shorten:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Create Commit
+        run: |
+          echo "Shortening URL: ${{ github.event.inputs.long_url }}"
+          echo "${{ github.event.inputs.long_url }}" > last_url.txt
+          git add last_url.txt
+          git commit -m "${{ github.event.inputs.long_url }}"
+          git push
+
+      - name: Output Commit Hash
+        id: get_hash
+        run: echo "hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Display Short URL
+        run: |
+          echo "Short URL: https://yourvercelapp.vercel.app/${{ steps.get_hash.outputs.hash }}"
