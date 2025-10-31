@@ -1,17 +1,18 @@
 export async function fetchOriginalUrl(commitHash) {
-    const repoOwner = "your-github-username";
-    const repoName = "gh-shorturl";
-  
-    const patchUrl = `https://github.com/${repoOwner}/${repoName}/commit/${commitHash}.patch`;
-  
-    const res = await fetch(patchUrl);
-    const text = await res.text();
-  
-    // Commit message appears in the patch header as "Subject: [long URL]"
-    const match = text.match(/^Subject: \[PATCH\] (.+)$/m);
-    if (match && match[1]) {
-      return match[1].trim();
+  if (!commitHash) throw new Error("Missing commit hash");
+
+  try {
+    const res = await fetch(`/api/fetch-url?commitHash=${commitHash}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Failed to fetch original URL:", data);
+      throw new Error(data.error || "Failed to fetch original URL");
     }
-    throw new Error("URL not found in patch");
+
+    return data.longUrl;
+  } catch (err) {
+    console.error("Error fetching original URL:", err);
+    throw err;
   }
-  
+}

@@ -9,6 +9,7 @@ export default function Redirect() {
     async function redirectNow() {
       try {
         const original = await fetchOriginalUrl(id);
+        console.log("Original URL:", original);
         window.location.href = original;
       } catch (err) {
         console.error(err);

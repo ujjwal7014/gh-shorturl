@@ -51,6 +51,7 @@ export default function Home() {
 
       <p style={{ marginTop: "20px" }}>{status}</p>
       {shortLink && <p>{shortLink}</p>}
+      
     </div>
   );
 }
