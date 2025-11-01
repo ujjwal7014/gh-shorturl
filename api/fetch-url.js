@@ -17,48 +17,7 @@ function normalizeUrl(raw) {
   if (url.startsWith("<") && url.endsWith(">")) {
     url = url.slice(1, -1).trim();
   }
-
-  // Convert GitHub blob links to raw content
-  const githubBlob = url.match(
-    /^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/
-  );
-  if (githubBlob) {
-    const [, owner, repo, ref, path] = githubBlob;
-    return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${path}`;
-  }
-
-  // Convert GitHub blob links with line anchors
-  const githubBlobWithHash = url.match(
-    /^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/([^#]+)(#.+)?$/
-  );
-  if (githubBlobWithHash) {
-    const [, owner, repo, ref, path] = githubBlobWithHash;
-    return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${path}`;
-  }
-
-  // Keep raw GitHub/Gist links as-is
-  if (
-    url.includes("raw.githubusercontent.com") ||
-    url.includes("gist.githubusercontent.com")
-  ) {
-    return url;
-  }
-
-  // Convert Google Drive share links → direct download
-  let m = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (m) {
-    return `https://drive.google.com/uc?export=download&id=${m[1]}`;
-  }
-  m = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
-  if (m) {
-    return `https://drive.google.com/uc?export=download&id=${m[1]}`;
-  }
-
-  m = url.match(/drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]+)/);
-  if (m) {
-    return url; // folder — keep as-is
-  }
-
+  
   // Keep sandbox or online IDE links as-is
   if (
     /codesandbox\.io|stackblitz\.com|replit\.com|sandbox\.io|glitch\.com/.test(url)
