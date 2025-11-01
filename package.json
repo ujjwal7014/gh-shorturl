@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "vercel:dev": "cp vercel.dev.json vercel.json && vercel dev",
+    "vercel:deploy": "cp vercel.prod.json vercel.json && vercel --prod"
   },
   "dependencies": {
     "react": "^19.1.1",
