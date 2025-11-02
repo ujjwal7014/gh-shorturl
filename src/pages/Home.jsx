@@ -6,31 +6,18 @@ export default function Home() {
   const [status, setStatus] = useState("");
   const [shortLink, setShortLink] = useState("");
 
-  // const handleShorten = async () => {
-  //   if (!url.trim()) return;
-
-  //   setStatus("Shortening...");
-  //   try {
-  //     await triggerShortenAction(url);
-  //     setStatus("✅ Successfully triggered! Check your repo for new commit.");
-  //     setShortLink("The short link will appear once the Action completes.");
-  //   } catch (err) {
-  //     setStatus("❌ Error: " + err.message);
-  //   }
-  // };
-
   const handleCreateShortUrl = async () => {
     if (!url.trim()) return;
-  
+
     setStatus("Creating short URL...");
     try {
       const result = await triggerCreateShortUrl(url);
-  
+
       if (result.error) {
         setStatus("❌ Error: " + result.error);
         return;
       }
-  
+
       setStatus("✅ Short URL created successfully!");
       setShortLink(`https://${result.shortUrl}`);
     } catch (err) {
@@ -39,8 +26,27 @@ export default function Home() {
     }
   };
 
+  const handleCopy = async () => {
+    if (shortLink) {
+      await navigator.clipboard.writeText(shortLink);
+      setStatus("📋 Copied to clipboard!");
+    }
+  };
+
+  const handleOpen = () => {
+    if (shortLink) {
+      window.open(shortLink, "_blank");
+    }
+  };
+
   return (
-    <div style={{ padding: "2rem", textAlign: "center", fontFamily: "sans-serif" }}>
+    <div
+      style={{
+        padding: "2rem",
+        textAlign: "center",
+        fontFamily: "sans-serif",
+      }}
+    >
       <h1>🔗 GitHub ShortURL</h1>
       <input
         type="text"
@@ -70,8 +76,41 @@ export default function Home() {
       </button>
 
       <p style={{ marginTop: "20px" }}>{status}</p>
-      {shortLink && <p>{shortLink}</p>}
-      
+
+      {shortLink && (
+        <div style={{ marginTop: "10px" }}>
+          <span style={{ fontWeight: "bold", marginRight: "10px" }}>
+            {shortLink}
+          </span>
+          <button
+            onClick={handleCopy}
+            style={{
+              padding: "6px 10px",
+              marginRight: "8px",
+              border: "none",
+              borderRadius: "6px",
+              background: "#6C757D",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            Copy
+          </button>
+          <button
+            onClick={handleOpen}
+            style={{
+              padding: "6px 10px",
+              border: "none",
+              borderRadius: "6px",
+              background: "#28A745",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            Open Link
+          </button>
+        </div>
+      )}
     </div>
   );
 }
