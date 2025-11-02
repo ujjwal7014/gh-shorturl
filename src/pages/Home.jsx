@@ -1,20 +1,40 @@
 import { useState } from "react";
-import { triggerShortenAction } from "../api/triggerAction";
+import { triggerCreateShortUrl } from "../api/triggerAction";
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState("");
   const [shortLink, setShortLink] = useState("");
 
-  const handleShorten = async () => {
-    if (!url.trim()) return;
+  // const handleShorten = async () => {
+  //   if (!url.trim()) return;
 
-    setStatus("Shortening...");
+  //   setStatus("Shortening...");
+  //   try {
+  //     await triggerShortenAction(url);
+  //     setStatus("✅ Successfully triggered! Check your repo for new commit.");
+  //     setShortLink("The short link will appear once the Action completes.");
+  //   } catch (err) {
+  //     setStatus("❌ Error: " + err.message);
+  //   }
+  // };
+
+  const handleCreateShortUrl = async () => {
+    if (!url.trim()) return;
+  
+    setStatus("Creating short URL...");
     try {
-      await triggerShortenAction(url);
-      setStatus("✅ Successfully triggered! Check your repo for new commit.");
-      setShortLink("The short link will appear once the Action completes.");
+      const result = await triggerCreateShortUrl(url);
+  
+      if (result.error) {
+        setStatus("❌ Error: " + result.error);
+        return;
+      }
+  
+      setStatus("✅ Short URL created successfully!");
+      setShortLink(`https://${result.shortUrl}`);
     } catch (err) {
+      console.error("Error:", err);
       setStatus("❌ Error: " + err.message);
     }
   };
@@ -35,7 +55,7 @@ export default function Home() {
         }}
       />
       <button
-        onClick={handleShorten}
+        onClick={handleCreateShortUrl}
         style={{
           marginLeft: "10px",
           padding: "10px 16px",
