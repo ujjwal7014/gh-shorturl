@@ -1,9 +1,15 @@
 // api/fetch-url.js
-// Vercel API handler: given ?commitHash=<hashOrUrl>
-// - if commitHash is a URL, normalize & return it
-// - otherwise treat as a commit SHA, fetch commit patch from GitHub,
-//   extract the commit message (which should contain the original long URL), normalize it and return it.
-// returns JSON: { longUrl: string }
+/*
+Request ──▶ /api/fetch-url?commitHash=<input>
+              │
+              ├─ if input looks like URL ─▶ normalizeUrl() ─▶ return { longUrl }
+              │
+              └─ else treat as commit hash ─▶ fetchCommitPatch()
+                                             └─ extract URL from commit message
+                                                └─ normalizeUrl()
+                                                   └─ return { longUrl }
+
+*/
 
 function isLikelyUrl(s) {
   return /^https?:\/\//i.test(s) || /^[\w-]+\.[\w.-]+/.test(s);
@@ -17,7 +23,7 @@ function normalizeUrl(raw) {
   if (url.startsWith("<") && url.endsWith(">")) {
     url = url.slice(1, -1).trim();
   }
-  
+
   // Keep sandbox or online IDE links as-is
   if (
     /codesandbox\.io|stackblitz\.com|replit\.com|sandbox\.io|glitch\.com/.test(url)
